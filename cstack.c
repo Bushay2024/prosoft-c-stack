@@ -110,7 +110,7 @@ void stack_push(const hstack_t hstack, const void* data_in, const unsigned int s
     new_item->size = size;
     memcpy(new_item->data, data_in, size);
     all_stacks[hstack]->head = new_item;
-    // Не забeдем увеличить число элементов в стеке
+    // Не забудем увеличить число элементов в стеке
     all_stacks[hstack]->size++;
 }
 
@@ -120,7 +120,7 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     if (stack_valid_handler(hstack)) {
         return 0;
     }
-    // Размер стэка ненулеваой?
+    // Размер стэка ненулевой?
     if (all_stacks[hstack]->size == 0) {
         return 0;
     }
