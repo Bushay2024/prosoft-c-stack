@@ -38,7 +38,7 @@ hstack_t stack_new(void)
     for (unsigned int i=0; i < MAX_STACKS; i++) {
         if (all_stacks[i] == NULL) {
             all_stacks[i] = (struct stack*)malloc(sizeof(struct stack));
-            if (!all_stacks[i]) {
+            if (all_stacks[i] == NULL) {
                 return -1;
             }
             all_stacks[i]->size = 0;
@@ -51,7 +51,7 @@ hstack_t stack_new(void)
 
 void stack_free(const hstack_t hstack)
 {
-    if (stack_valid_handler(hstack)) {
+    if (stack_valid_handler(hstack) == 0) {
         // Проходим по всем элементам стека, начиная с головы
         struct stack_item* item = all_stacks[hstack]->head;
         while (item != NULL) {
@@ -70,7 +70,7 @@ int stack_valid_handler(const hstack_t hstack)
 {
     // Валидный хэндл - если он меньше размера массива
     // и если по его адресу в массиве что-то есть
-    if (hstack < MAX_STACKS || hstack < 0 ) {
+    if (hstack >= MAX_STACKS || hstack < 0 ) {
         return 1;
     }
     if (all_stacks[hstack] != NULL) {
@@ -83,7 +83,7 @@ unsigned int stack_size(const hstack_t hstack)
 {
     // Если хэндл валидный - то достаточно вернуть поле size соответсвующего стэка, иначе - 0
     
-    if (hstack < MAX_STACKS && all_stacks[hstack] != NULL) {
+    if (stack_valid_handler(hstack) == 0) {
         return all_stacks[hstack]->size;
     }
     return 0;
@@ -91,10 +91,7 @@ unsigned int stack_size(const hstack_t hstack)
 
 void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
 {
-    if (hstack >= MAX_STACKS) {
-        return;
-    }
-    if (all_stacks[hstack] == NULL) {
+    if (stack_valid_handler(hstack)) {
         return;
     }
     if (data_in == NULL || size == 0) {
@@ -113,20 +110,17 @@ void stack_push(const hstack_t hstack, const void* data_in, const unsigned int s
     new_item->size = size;
     memcpy(new_item->data, data_in, size);
     all_stacks[hstack]->head = new_item;
-    // Не забедем увеличить число элементов в стеке
+    // Не забeдем увеличить число элементов в стеке
     all_stacks[hstack]->size++;
 }
 
 unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
 {
-    // Хэндл вадидный?
-    if (hstack >= MAX_STACKS || hstack < 0) {
+    // Хэндл валидный?
+    if (stack_valid_handler(hstack)) {
         return 0;
     }
-    if (all_stacks[hstack] == NULL) {
-        return 0;
-    }
-    // Размер стэка ненулевой?
+    // Размер стэка ненулеваой?
     if (all_stacks[hstack]->size == 0) {
         return 0;
     }
@@ -135,13 +129,13 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
         return 0;
     }
 
-    // Если дошли до сюда - то можем смело скопировать верхний элемент стэка в data_out
+    // Копируем  верхний элемент стэка в data_out
     struct stack_item* item = all_stacks[hstack]->head;
     memcpy(data_out, item->data, size);
     all_stacks[hstack]->head = item->next;
     all_stacks[hstack]->size--;
     free(item);
 
-    // ... и вернукть его размер
+    // возвращаем его размер
     return size;
 }
